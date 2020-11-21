@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/sfardiansyah/laywook/pkg/auth"
+	"github.com/sfardiansyah/laywook/pkg/http/rest"
+	"github.com/sfardiansyah/laywook/pkg/storage/mongodb"
 )
 
 func main() {
@@ -15,9 +18,13 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	fmt.Println("Hello World!")
+	s, err := mongodb.NewStorage()
+	if err != nil {
+		log.Fatalf("error: %v\n", err)
+	}
 
-	r := http.NewServeMux()
+	a := auth.Service(s)
+	r := rest.Handler(a)
 
 	fmt.Printf("Starting beanie at http://localhost:%s/\n", os.Getenv("PORT"))
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), r))
